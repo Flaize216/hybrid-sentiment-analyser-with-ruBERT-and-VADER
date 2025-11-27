@@ -6,15 +6,12 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-print("=== 🎭 ГИБРИДНЫЙ АНАЛИЗАТОР ТОНАЛЬНОСТИ ===")
-print("🔧 Vader (английский) + RuBERT (русский)")
-
 
 class HybridSentimentAnalyzer:
     def __init__(
         self,
-        rubert_model_path: str = "./trained-rubert-large-sentiment_slow",
-        vader_confidence_threshold: float = 0.65,
+        rubert_model_path: str = "C:\\Users\\Flaize\\Desktop\\prog\\trained_base_sentiment_model",
+        vader_confidence_threshold=0.65,
     ):
         """
         Инициализация гибридного анализатора
@@ -23,23 +20,21 @@ class HybridSentimentAnalyzer:
             rubert_model_path: Путь к обученной модели RuBERT
             vader_confidence_threshold: Порог уверенности Vader (0-1)
         """
-        print("🔄 Инициализация анализаторов...")
+        print(" Инициализация анализаторов...")
 
-        # 🔧 СОХРАНЯЕМ ПОРОГ КАК АТРИБУТ КЛАССА
+        #  СОХРАНЯЕМ ПОРОГ КАК АТРИБУТ КЛАССА
         self.vader_confidence_threshold = vader_confidence_threshold
-        print(
-            f"✅ Установлен порог уверенности Vader: {self.vader_confidence_threshold}"
-        )
+        print(f" Установлен порог уверенности Vader: {self.vader_confidence_threshold}")
 
-        # 🔧 ИНИЦИАЛИЗАЦИЯ VADER (для английского)
+        #  ИНИЦИАЛИЗАЦИЯ VADER (для английского)
         self.vader_analyzer = SentimentIntensityAnalyzer()
-        print("✅ Vader Sentiment Analyzer загружен")
+        print(" Vader Sentiment Analyzer загружен")
 
-        # 🔧 ИНИЦИАЛИЗАЦИЯ ПЕРЕВОДЧИКА
+        #  ИНИЦИАЛИЗАЦИЯ ПЕРЕВОДЧИКА
         self.translator = GoogleTranslator(source="ru", target="en")
-        print("✅ Переводчик GoogleTranslator инициализирован")
+        print(" Переводчик GoogleTranslator инициализирован")
 
-        # 🔧 ИНИЦИАЛИЗАЦИЯ RuBERT (для русского)
+        #  ИНИЦИАЛИЗАЦИЯ RuBERT (для русского)
         try:
             self.rubert_tokenizer = AutoTokenizer.from_pretrained(rubert_model_path)
             self.rubert_model = AutoModelForSequenceClassification.from_pretrained(
@@ -51,12 +46,12 @@ class HybridSentimentAnalyzer:
             self.rubert_model = self.rubert_model.to(self.device)
             self.rubert_model.eval()
 
-            print(f"✅ RuBERT модель загружена на {self.device}")
-            print(f"📁 Путь к модели: {rubert_model_path}")
+            print(f" RuBERT модель загружена на {self.device}")
+            print(f" Путь к модели: {rubert_model_path}")
 
         except Exception as e:
-            print(f"❌ Ошибка загрузки RuBERT модели: {e}")
-            print("🔄 Пробуем загрузить стандартную модель...")
+            print(f" Ошибка загрузки RuBERT модели: {e}")
+            print(" Пробуем загрузить стандартную модель...")
             self._load_fallback_rubert()
 
     def set_vader_threshold(self, new_threshold: float):
@@ -69,10 +64,10 @@ class HybridSentimentAnalyzer:
         if 0 <= new_threshold <= 1:
             old_threshold = self.vader_confidence_threshold
             self.vader_confidence_threshold = new_threshold
-            print(f"✅ Порог Vader изменен: {old_threshold} → {new_threshold}")
+            print(f" Порог Vader изменен: {old_threshold} → {new_threshold}")
             return True
         else:
-            print(f"❌ Порог должен быть между 0.0 и 1.0")
+            print(f" Порог должен быть между 0.0 и 1.0")
             return False
 
     def get_current_threshold(self) -> float:
@@ -91,9 +86,9 @@ class HybridSentimentAnalyzer:
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
             self.rubert_model = self.rubert_model.to(self.device)
             self.rubert_model.eval()
-            print("✅ Резервная RuBERT модель загружена")
+            print(" Резервная RuBERT модель загружена")
         except Exception as e:
-            print(f"❌ Критическая ошибка: {e}")
+            print(f" Критическая ошибка: {e}")
             raise
 
     def translate_text(self, text: str) -> str:
@@ -110,7 +105,7 @@ class HybridSentimentAnalyzer:
             translated = self.translator.translate(text)
             return translated
         except Exception as e:
-            print(f"❌ Ошибка перевода: {e}")
+            print(f" Ошибка перевода: {e}")
             return text  # Возвращаем оригинальный текст в случае ошибки
 
     def vader_analyze(self, text: str) -> dict:
@@ -151,7 +146,7 @@ class HybridSentimentAnalyzer:
             }
 
         except Exception as e:
-            print(f"❌ Ошибка Vader анализа: {e}")
+            print(f" Ошибка Vader анализа: {e}")
             return None
 
     def rubert_analyze(self, text: str) -> dict:
@@ -193,7 +188,7 @@ class HybridSentimentAnalyzer:
             }
 
         except Exception as e:
-            print(f"❌ Ошибка RuBERT анализа: {e}")
+            print(f" Ошибка RuBERT анализа: {e}")
             return None
 
     def hybrid_analyze(self, russian_text: str, custom_threshold: float = None) -> dict:
@@ -207,46 +202,46 @@ class HybridSentimentAnalyzer:
         Returns:
             Словарь с результатами гибридного анализа
         """
-        # 🔧 ИСПОЛЬЗУЕМ КАСТОМНЫЙ ПОРОГ ИЛИ УСТАНОВЛЕННЫЙ
+        #  ИСПОЛЬЗУЕМ КАСТОМНЫЙ ПОРОГ ИЛИ УСТАНОВЛЕННЫЙ
         threshold = (
             custom_threshold
             if custom_threshold is not None
             else self.vader_confidence_threshold
         )
 
-        print(f"\n🔍 АНАЛИЗ ТЕКСТА: '{russian_text}'")
+        print(f"\n АНАЛИЗ ТЕКСТА: '{russian_text}'")
         print("=" * 60)
-        print(f"🎯 Текущий порог Vader: {threshold:.2f}")
+        print(f" Текущий порог Vader: {threshold:.2f}")
 
-        # 📝 ШАГ 1: Анализ RuBERT (оригинальный русский текст)
-        print("🔄 RuBERT анализирует оригинальный текст...")
+        #  ШАГ 1: Анализ RuBERT (оригинальный русский текст)
+        print(" RuBERT анализирует оригинальный текст...")
         rubert_result = self.rubert_analyze(russian_text)
 
         if rubert_result:
             print(
-                f"   ✅ RuBERT: {rubert_result['sentiment']} (уверенность: {rubert_result['confidence']:.3f})"
+                f"    RuBERT: {rubert_result['sentiment']} (уверенность: {rubert_result['confidence']:.3f})"
             )
         else:
-            print("   ❌ RuBERT: ошибка анализа")
+            print("    RuBERT: ошибка анализа")
 
-        # 🌐 ШАГ 2: Перевод и анализ Vader
-        print("🔄 Перевод на английский для Vader...")
+        #  ШАГ 2: Перевод и анализ Vader
+        print(" Перевод на английский для Vader...")
         english_text = self.translate_text(russian_text)
-        print(f"   📖 Перевод: '{english_text}'")
+        print(f"    Перевод: '{english_text}'")
 
-        print("🔄 Vader анализирует перевод...")
+        print(" Vader анализирует перевод...")
         vader_result = self.vader_analyze(english_text)
 
         if vader_result:
             print(
-                f"   ✅ Vader: {vader_result['sentiment']} (уверенность: {vader_result['confidence']:.3f})"
+                f"    Vader: {vader_result['sentiment']} (уверенность: {vader_result['confidence']:.3f})"
             )
-            print(f"   📊 Vader scores: {vader_result['scores']}")
+            print(f"    Vader scores: {vader_result['scores']}")
         else:
-            print("   ❌ Vader: ошибка анализа")
+            print("    Vader: ошибка анализа")
 
-        # 🎯 ШАГ 3: Принятие решения
-        print(f"\n🎯 ПРИНЯТИЕ РЕШЕНИЯ (порог: {threshold:.2f}):")
+        #  ШАГ 3: Принятие решения
+        print(f"\n ПРИНЯТИЕ РЕШЕНИЯ (порог: {threshold:.2f}):")
 
         final_result = {
             "original_text": russian_text,
@@ -268,7 +263,7 @@ class HybridSentimentAnalyzer:
             final_result["decision_reason"] = (
                 f"Vader уверен на {vader_result['confidence']:.1%} (порог: {threshold:.0%})"
             )
-            print(f"   ✅ Используем Vader: {final_result['decision_reason']}")
+            print(f"    Используем Vader: {final_result['decision_reason']}")
 
         # Иначе используем RuBERT
         elif rubert_result:
@@ -278,7 +273,7 @@ class HybridSentimentAnalyzer:
             final_result["decision_reason"] = (
                 f"Vader недостаточно уверен ({vader_result['confidence']:.1%} при пороге {threshold:.0%})"
             )
-            print(f"   ✅ Используем RuBERT: {final_result['decision_reason']}")
+            print(f"    Используем RuBERT: {final_result['decision_reason']}")
 
         else:
             final_result["final_sentiment"] = "NEUTRAL"
@@ -287,16 +282,16 @@ class HybridSentimentAnalyzer:
             final_result["decision_reason"] = (
                 "Оба анализатора не сработали, используем нейтральный результат"
             )
-            print("   ⚠️  Используем fallback: оба анализатора не сработали")
+            print("     Используем fallback: оба анализатора не сработали")
 
         return final_result
 
     def print_analysis_result(self, result: dict):
         """Красивый вывод результатов анализа"""
-        print("\n" + "🎯 РЕЗУЛЬТАТ АНАЛИЗА " + "=" * 40)
+        print("\n" + " РЕЗУЛЬТАТ АНАЛИЗА " + "=" * 40)
 
         # Эмодзи для тональности
-        emoji_map = {"POSITIVE": "😊", "NEGATIVE": "😞", "NEUTRAL": "😐"}
+        emoji_map = {"POSITIVE": "", "NEGATIVE": "😞", "NEUTRAL": "😐"}
 
         emoji = emoji_map.get(result["final_sentiment"], "❓")
         confidence_color = (
@@ -305,24 +300,24 @@ class HybridSentimentAnalyzer:
             else "🟡" if result["final_confidence"] > 0.5 else "🔴"
         )
 
-        print(f"📝 Оригинальный текст: {result['original_text']}")
-        print(f"🌐 Перевод: {result['translated_text']}")
+        print(f" Оригинальный текст: {result['original_text']}")
+        print(f" Перевод: {result['translated_text']}")
         print(f"\n{emoji} ФИНАЛЬНАЯ ТОНАЛЬНОСТЬ: {result['final_sentiment']}")
         print(f"{confidence_color} УВЕРЕННОСТЬ: {result['final_confidence']:.3f}")
-        print(f"🔧 ИСПОЛЬЗОВАН: {result['used_analyzer']}")
-        print(f"🎯 ПОРОГ: {result['threshold_used']:.2f}")
-        print(f"💡 ПРИЧИНА: {result['decision_reason']}")
+        print(f" ИСПОЛЬЗОВАН: {result['used_analyzer']}")
+        print(f" ПОРОГ: {result['threshold_used']:.2f}")
+        print(f" ПРИЧИНА: {result['decision_reason']}")
 
         # Детали анализаторов
-        print(f"\n📊 ДЕТАЛИ АНАЛИЗАТОРОВ:")
+        print(f"\n ДЕТАЛИ АНАЛИЗАТОРОВ:")
         if result["vader_result"]:
-            vader_emoji = emoji_map.get(result["vader_result"]["sentiment"], "❓")
+            vader_emoji = emoji_map.get(result["vader_result"]["sentiment"], "")
             print(
                 f"   Vader: {vader_emoji} {result['vader_result']['sentiment']} (уверенность: {result['vader_result']['confidence']:.3f})"
             )
 
         if result["rubert_result"]:
-            rubert_emoji = emoji_map.get(result["rubert_result"]["sentiment"], "❓")
+            rubert_emoji = emoji_map.get(result["rubert_result"]["sentiment"], "")
             print(
                 f"   RuBERT: {rubert_emoji} {result['rubert_result']['sentiment']} (уверенность: {result['rubert_result']['confidence']:.3f})"
             )
@@ -330,7 +325,7 @@ class HybridSentimentAnalyzer:
         print("=" * 60)
 
 
-# 🎯 ФУНКЦИЯ ДЛЯ ТЕСТИРОВАНИЯ С РАЗНЫМИ ПОРОГАМИ
+# ФУНКЦИЯ ДЛЯ ТЕСТИРОВАНИЯ С РАЗНЫМИ ПОРОГАМИ
 def test_with_different_thresholds():
     """Тестирование с разными порогами уверенности"""
 
@@ -346,7 +341,7 @@ def test_with_different_thresholds():
     thresholds = [0.5, 0.65, 0.8, 0.9]  # Разные пороги для тестирования
 
     for threshold in thresholds:
-        print(f"\n🧪 ТЕСТ С ПОРОГОМ: {threshold}")
+        print(f"\n ТЕСТ С ПОРОГОМ: {threshold}")
         print("=" * 50)
 
         analyzer.set_vader_threshold(threshold)
@@ -365,7 +360,7 @@ def test_with_different_thresholds():
             )
 
 
-# 💬 ИНТЕРАКТИВНЫЙ РЕЖИМ
+#  ИНТЕРАКТИВНЫЙ РЕЖИМ
 def interactive_mode():
     """Интерактивный режим для ввода пользовательских текстов"""
     analyzer = HybridSentimentAnalyzer()
@@ -378,10 +373,10 @@ def interactive_mode():
     print("=" * 50)
 
     while True:
-        user_input = input("\n📝 Введите русский текст или команду: ").strip()
+        user_input = input("\n Введите русский текст или команду: ").strip()
 
         if user_input.lower() in ["quit", "exit", "выход"]:
-            print("👋 До свидания!")
+            print(" До свидания!")
             break
 
         elif user_input.lower() == "threshold":
@@ -390,15 +385,15 @@ def interactive_mode():
                     input("Введите новый порог уверенности Vader (0.0-1.0): ")
                 )
                 if analyzer.set_vader_threshold(new_threshold):
-                    print(f"✅ Новый порог установлен: {new_threshold}")
+                    print(f" Новый порог установлен: {new_threshold}")
                 else:
-                    print("❌ Не удалось установить порог")
+                    print(" Не удалось установить порог")
             except ValueError:
-                print("❌ Введите число")
+                print(" Введите число")
             continue
 
         elif not user_input:
-            print("⚠️  Пожалуйста, введите текст")
+            print("  Пожалуйста, введите текст")
             continue
 
         # Анализируем текст
@@ -406,10 +401,10 @@ def interactive_mode():
         analyzer.print_analysis_result(result)
 
 
-# 🚀 ОСНОВНАЯ ФУНКЦИЯ
+#  ОСНОВНАЯ ФУНКЦИЯ
 def main():
-    print("🎭 ГИБРИДНЫЙ АНАЛИЗАТОР ТОНАЛЬНОСТИ")
-    print("🔧 Vader (английский перевод) + RuBERT (русский оригинал)")
+    print("ГИБРИДНЫЙ АНАЛИЗАТОР ТОНАЛЬНОСТИ")
+    print(" Vader (английский перевод) + RuBERT (русский оригинал)")
     print("=" * 60)
 
     # Создаем анализатор с начальным порогом
@@ -418,11 +413,11 @@ def main():
     while True:
         print(f"\nТекущий порог Vader: {analyzer.get_current_threshold()}")
         print("\nВыберите режим:")
-        print("1. 🧪 Тестирование на примерах")
-        print("2. 💬 Интерактивный режим")
-        print("3. ⚙️  Настроить порог уверенности Vader")
-        print("4. 📊 Тест с разными порогами")
-        print("5. 🚪 Выход")
+        print("1.  Тестирование на примерах")
+        print("2.  Интерактивный режим")
+        print("3.   Настроить порог уверенности Vader")
+        print("4.  Тест с разными порогами")
+        print("5.  Выход")
 
         choice = input("\nВаш выбор: ").strip()
 
@@ -446,21 +441,21 @@ def main():
                     input("Введите новый порог уверенности Vader (0.0-1.0): ")
                 )
                 if analyzer.set_vader_threshold(new_threshold):
-                    print(f"✅ Новый порог установлен: {new_threshold}")
+                    print(f" Новый порог установлен: {new_threshold}")
                 else:
-                    print("❌ Не удалось установить порог")
+                    print(" Не удалось установить порог")
             except ValueError:
-                print("❌ Введите число")
+                print(" Введите число")
 
         elif choice == "4":
             test_with_different_thresholds()
 
         elif choice == "5":
-            print("👋 До свидания!")
+            print(" До свидания!")
             break
 
         else:
-            print("❌ Неверный выбор!")
+            print(" Неверный выбор!")
 
 
 if __name__ == "__main__":
